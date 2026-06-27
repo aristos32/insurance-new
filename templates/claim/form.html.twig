@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Claim{% endblock %}
+
+{% block body %}
+<h1 class="mb-3">New Claim for {{ owner.fullName }}</h1>
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary mt-2">Save</button>
+{% endblock %}

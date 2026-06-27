@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: dev
+      APP_SECRET: ${APP_SECRET:-change_me_in_production}
+      DATABASE_URL: mysql://${MYSQL_USER:-insurance}:${MYSQL_PASSWORD:-insurance}@database:3306/${MYSQL_DATABASE:-insurance}?serverVersion=8.0&charset=utf8mb4
+      GLOBAL_DATABASE_URL: mysql://${MYSQL_USER:-insurance}:${MYSQL_PASSWORD:-insurance}@database:3306/${GLOBAL_MYSQL_DATABASE:-insurance_global}?serverVersion=8.0&charset=utf8mb4
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:80"
+
+  database:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-insurance}
+      MYSQL_USER: ${MYSQL_USER:-insurance}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-insurance}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql_data:

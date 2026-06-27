@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Transactions - {{ sale.saleId }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between mb-3">
+    <h1>Transactions for {{ sale.saleId }}</h1>
+    <a href="{{ path('app_transaction_new', {saleId: sale.saleId}) }}" class="btn btn-primary">Add Transaction</a>
+</div>
+
+<p>Current balance: <strong>{{ sale.currentBalance|number_format(2) }} €</strong></p>
+
+<table class="table table-striped">
+    <thead><tr><th>Date</th><th>Details</th><th>Debit</th><th>Credit</th><th>Balance</th><th>Receipt</th></tr></thead>
+    <tbody>
+    {% for t in sale.transactions %}
+        <tr>
+            <td>{{ t.transDate ? t.transDate|date('Y-m-d') : '-' }}</td>
+            <td>{{ t.details ? t.details.value : '-' }}</td>
+            <td>{{ t.debit ? t.debit|number_format(2) : '-' }}</td>
+            <td>{{ t.credit ? t.credit|number_format(2) : '-' }}</td>
+            <td>{{ t.remainder|number_format(2) }}</td>
+            <td>{{ t.receiptNo }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6">No transactions.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

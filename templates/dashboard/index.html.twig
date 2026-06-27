@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">Dashboard</h1>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card"><div class="card-body"><h2 class="h5">Clients</h2><p class="display-6">{{ clientCount }}</p></div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card"><div class="card-body"><h2 class="h5">Contracts</h2><p class="display-6">{{ contractCount }}</p></div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card"><div class="card-body"><h2 class="h5">Claims</h2><p class="display-6">{{ claimCount }}</p></div></div>
+    </div>
+</div>
+
+<h2 class="h4">Contracts expiring in 30 days</h2>
+<table class="table table-striped">
+    <thead><tr><th>Contract</th><th>Client</th><th>End Date</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for sale in expiringContracts %}
+        <tr>
+            <td><a href="{{ path('app_sale_show', {saleId: sale.saleId}) }}">{{ sale.saleId }}</a></td>
+            <td>{{ sale.owner.fullName }}</td>
+            <td>{{ sale.endDate ? sale.endDate|date('Y-m-d') : '-' }}</td>
+            <td>{{ sale.status ? sale.status.value : '-' }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="4">No contracts expiring soon.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

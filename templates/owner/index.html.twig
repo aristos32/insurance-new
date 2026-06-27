@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Clients{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Clients & Leads</h1>
+    <a href="{{ path('app_owner_new') }}" class="btn btn-primary">New Client</a>
+</div>
+
+<form class="row g-2 mb-3">
+    <div class="col-md-6"><input class="form-control" name="q" value="{{ query }}" placeholder="Search by name, ID, email..."></div>
+    <div class="col-md-3">
+        <select class="form-select" name="type">
+            <option value="">All types</option>
+            <option value="account" {% if type and type.value == 'account' %}selected{% endif %}>Clients</option>
+            <option value="lead" {% if type and type.value == 'lead' %}selected{% endif %}>Leads</option>
+        </select>
+    </div>
+    <div class="col-md-3"><button class="btn btn-secondary w-100">Search</button></div>
+</form>
+
+<table class="table table-hover">
+    <thead><tr><th>State ID</th><th>Name</th><th>Type</th><th>Email</th><th>Phone</th><th></th></tr></thead>
+    <tbody>
+    {% for owner in owners %}
+        <tr>
+            <td>{{ owner.stateId }}</td>
+            <td>{{ owner.fullName }}</td>
+            <td>{{ owner.type ? owner.type.value : '-' }}</td>
+            <td>{{ owner.email }}</td>
+            <td>{{ owner.telephone }}</td>
+            <td><a href="{{ path('app_owner_show', {stateId: owner.stateId}) }}">View</a></td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6">No clients found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

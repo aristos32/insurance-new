@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Outstanding Balances{% endblock %}
+
+{% block body %}
+<h1 class="mb-3">Contracts with outstanding balance</h1>
+<table class="table table-striped">
+    <thead><tr><th>Contract</th><th>Client</th><th>Balance</th></tr></thead>
+    <tbody>
+    {% for sale in sales %}
+        <tr>
+            <td><a href="{{ path('app_sale_show', {saleId: sale.saleId}) }}">{{ sale.saleId }}</a></td>
+            <td>{{ sale.owner.fullName }}</td>
+            <td>{{ sale.currentBalance|number_format(2) }} €</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="3">No outstanding balances.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

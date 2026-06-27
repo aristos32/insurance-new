@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Transaction{% endblock %}
+
+{% block body %}
+<h1 class="mb-3">New Transaction — {{ sale.saleId }}</h1>
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary mt-2">Save</button>
+    <a href="{{ path('app_transaction_index', {saleId: sale.saleId}) }}" class="btn btn-link mt-2">Cancel</a>
+{{ form_end(form) }}
+{% endblock %}

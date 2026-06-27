@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">Reports</h1>
+<ul class="list-group">
+    <li class="list-group-item"><a href="{{ path('app_report_expiring') }}">Contracts by expiry date</a></li>
+    <li class="list-group-item"><a href="{{ path('app_report_balances') }}">Contracts with outstanding balance</a></li>
+</ul>
+{% endblock %}

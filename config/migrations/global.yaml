@@ -1,0 +1,2 @@
+migrations_paths:
+    'DoctrineMigrations\Global': '/var/www/html/migrations/global'
