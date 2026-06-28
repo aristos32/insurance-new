@@ -5,14 +5,16 @@ namespace App\Controller;
 use App\Entity\Crm\Claim;
 use App\Form\ClaimType;
 use App\Repository\ClaimRepository;
-use App\Repository\OwnerRepository;
+use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/claims')]
+#[IsGranted('ROLE_EMPLOYEE')]
 final class ClaimController extends AbstractController
 {
     #[Route('', name: 'app_claim_index')]
@@ -24,14 +26,14 @@ final class ClaimController extends AbstractController
     }
 
     #[Route('/new/{stateId}', name: 'app_claim_new')]
-    public function new(string $stateId, Request $request, OwnerRepository $ownerRepository, EntityManagerInterface $em): Response
+    public function new(string $stateId, Request $request, CustomerRepository $customerRepository, EntityManagerInterface $em): Response
     {
-        $owner = $ownerRepository->find($stateId);
-        if (!$owner) {
+        $customer = $customerRepository->find($stateId);
+        if (!$customer) {
             throw $this->createNotFoundException();
         }
 
-        $claim = (new Claim())->setOwner($owner)->setClaimDate(new \DateTime());
+        $claim = (new Claim())->setCustomer($customer)->setClaimDate(new \DateTime());
         $form = $this->createForm(ClaimType::class, $claim);
         $form->handleRequest($request);
 
@@ -39,12 +41,12 @@ final class ClaimController extends AbstractController
             $em->persist($claim);
             $em->flush();
 
-            return $this->redirectToRoute('app_owner_show', ['stateId' => $stateId]);
+            return $this->redirectToRoute('app_customer_show', ['stateId' => $stateId]);
         }
 
         return $this->render('claim/form.html.twig', [
             'form' => $form,
-            'owner' => $owner,
+            'customer' => $customer,
         ]);
     }
 }

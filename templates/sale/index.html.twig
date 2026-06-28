@@ -19,7 +19,7 @@
     {% for sale in sales %}
         <tr>
             <td><a href="{{ path('app_sale_show', {saleId: sale.saleId}) }}">{{ sale.saleId }}</a></td>
-            <td>{{ sale.owner ? sale.owner.fullName : '-' }}</td>
+            <td>{{ sale.customer ? sale.customer.fullName : '-' }}</td>
             <td>{{ sale.insuranceType ? sale.insuranceType.value : '-' }}</td>
             <td>{{ sale.status ? sale.status.value : '-' }}</td>
             <td>{{ sale.endDate ? sale.endDate|date('Y-m-d') : '-' }}</td>

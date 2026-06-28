@@ -42,9 +42,9 @@ class Sale
     #[ORM\Column(length: 20, nullable: true, enumType: SaleStatus::class)]
     private ?SaleStatus $status = SaleStatus::Active;
 
-    #[ORM\ManyToOne(targetEntity: Owner::class, inversedBy: 'sales')]
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'sales')]
     #[ORM\JoinColumn(name: 'stateId', referencedColumnName: 'stateId', nullable: false, onDelete: 'CASCADE')]
-    private ?Owner $owner = null;
+    private ?Customer $customer = null;
 
     /** @var Collection<int, Transaction> */
     #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'sale', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -196,14 +196,14 @@ class Sale
         return $this;
     }
 
-    public function getOwner(): ?Owner
+    public function getCustomer(): ?Customer
     {
-        return $this->owner;
+        return $this->customer;
     }
 
-    public function setOwner(?Owner $owner): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->owner = $owner;
+        $this->customer = $customer;
 
         return $this;
     }

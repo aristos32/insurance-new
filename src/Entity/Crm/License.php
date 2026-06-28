@@ -23,9 +23,9 @@ class License
     #[ORM\Column(name: 'licenseCountry', length: 50, nullable: true)]
     private ?string $licenseCountry = null;
 
-    #[ORM\ManyToOne(targetEntity: Owner::class, inversedBy: 'licenses')]
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'licenses')]
     #[ORM\JoinColumn(name: 'stateId', referencedColumnName: 'stateId', nullable: false, onDelete: 'CASCADE')]
-    private ?Owner $owner = null;
+    private ?Customer $customer = null;
 
     public function getLicenseType(): ?string
     {
@@ -63,14 +63,14 @@ class License
         return $this;
     }
 
-    public function getOwner(): ?Owner
+    public function getCustomer(): ?Customer
     {
-        return $this->owner;
+        return $this->customer;
     }
 
-    public function setOwner(?Owner $owner): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->owner = $owner;
+        $this->customer = $customer;
 
         return $this;
     }

@@ -22,8 +22,8 @@ class SaleRepository extends ServiceEntityRepository
     public function search(?string $query, ?InsuranceType $type = null, ?SaleStatus $status = null, int $limit = 50): array
     {
         $qb = $this->createQueryBuilder('s')
-            ->leftJoin('s.owner', 'o')
-            ->addSelect('o')
+            ->leftJoin('s.customer', 'c')
+            ->addSelect('c')
             ->orderBy('s.startDate', 'DESC')
             ->setMaxResults($limit);
 
@@ -36,7 +36,7 @@ class SaleRepository extends ServiceEntityRepository
         }
 
         if ($query) {
-            $qb->andWhere('s.saleId LIKE :q OR s.company LIKE :q OR o.firstName LIKE :q OR o.lastName LIKE :q')
+            $qb->andWhere('s.saleId LIKE :q OR s.company LIKE :q OR c.firstName LIKE :q OR c.lastName LIKE :q')
                 ->setParameter('q', '%' . $query . '%');
         }
 
@@ -47,8 +47,8 @@ class SaleRepository extends ServiceEntityRepository
     public function findExpiringBetween(\DateTimeInterface $from, \DateTimeInterface $to): array
     {
         return $this->createQueryBuilder('s')
-            ->leftJoin('s.owner', 'o')
-            ->addSelect('o')
+            ->leftJoin('s.customer', 'c')
+            ->addSelect('c')
             ->where('s.endDate BETWEEN :from AND :to')
             ->andWhere('s.status = :status')
             ->setParameter('from', $from)
@@ -63,8 +63,8 @@ class SaleRepository extends ServiceEntityRepository
     public function findWithBalance(): array
     {
         $sales = $this->createQueryBuilder('s')
-            ->leftJoin('s.owner', 'o')
-            ->addSelect('o')
+            ->leftJoin('s.customer', 'c')
+            ->addSelect('c')
             ->leftJoin('s.transactions', 't')
             ->addSelect('t')
             ->getQuery()

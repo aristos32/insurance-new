@@ -10,7 +10,7 @@
     {% for claim in claims %}
         <tr>
             <td>{{ claim.claimDate ? claim.claimDate|date('Y-m-d') : '-' }}</td>
-            <td>{{ claim.owner ? claim.owner.fullName : '-' }}</td>
+            <td>{{ claim.customer ? claim.customer.fullName : '-' }}</td>
             <td>{{ claim.amount }}</td>
             <td>{{ claim.description }}</td>
         </tr>

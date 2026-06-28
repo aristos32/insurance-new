@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Crm\Owner;
+use App\Entity\Crm\Customer;
 use App\Entity\Crm\Sale;
 use App\Enum\InsuranceType;
 use App\Enum\SaleStatus;
@@ -20,9 +20,9 @@ class SaleType extends AbstractType
     {
         $builder
             ->add('saleId', TextType::class, ['label' => 'Contract No'])
-            ->add('owner', EntityType::class, [
-                'class' => Owner::class,
-                'choice_label' => fn (Owner $owner): string => $owner->getFullName() . ' (' . $owner->getStateId() . ')',
+            ->add('customer', EntityType::class, [
+                'class' => Customer::class,
+                'choice_label' => fn (Customer $customer): string => $customer->getFullName() . ' (' . $customer->getStateId() . ')',
             ])
             ->add('company', TextType::class, ['required' => false])
             ->add('insuranceType', ChoiceType::class, [

@@ -2,29 +2,29 @@
 
 namespace App\Repository;
 
-use App\Entity\Crm\StaffProfile;
+use App\Entity\Crm\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<StaffProfile>
+ * @extends ServiceEntityRepository<User>
  */
-class StaffProfileRepository extends ServiceEntityRepository
+class UserRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, StaffProfile::class);
+        parent::__construct($registry, User::class);
     }
 
-    /** @return StaffProfile[] */
+    /** @return User[] */
     public function search(?string $query, int $limit = 50): array
     {
-        $qb = $this->createQueryBuilder('s')
-            ->orderBy('s.lastName', 'ASC')
+        $qb = $this->createQueryBuilder('u')
+            ->orderBy('u.username', 'ASC')
             ->setMaxResults($limit);
 
-        if ($query) {
-            $qb->andWhere('s.username LIKE :q OR s.firstName LIKE :q OR s.lastName LIKE :q OR s.email LIKE :q')
+        if ($query !== null && $query !== '') {
+            $qb->andWhere('u.username LIKE :q OR u.firstName LIKE :q OR u.lastName LIKE :q OR u.email LIKE :q')
                 ->setParameter('q', '%' . $query . '%');
         }
 

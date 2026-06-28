@@ -6,5 +6,5 @@ enum HistoryType: string
 {
     case Contract = 'CONTRACT';
     case User = 'USER';
-    case Client = 'CLIENT';
+    case Customer = 'CUSTOMER';
 }

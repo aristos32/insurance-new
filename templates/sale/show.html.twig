@@ -12,7 +12,7 @@
 </div>
 
 <dl class="row">
-    <dt class="col-sm-2">Client</dt><dd class="col-sm-10"><a href="{{ path('app_owner_show', {stateId: sale.owner.stateId}) }}">{{ sale.owner.fullName }}</a></dd>
+    <dt class="col-sm-2">Customer</dt><dd class="col-sm-10"><a href="{{ path('app_customer_show', {stateId: sale.customer.stateId}) }}">{{ sale.customer.fullName }}</a></dd>
     <dt class="col-sm-2">Type</dt><dd class="col-sm-10">{{ sale.insuranceType ? sale.insuranceType.value : '-' }}</dd>
     <dt class="col-sm-2">Coverage</dt><dd class="col-sm-10">{{ sale.coverageType }}</dd>
     <dt class="col-sm-2">Status</dt><dd class="col-sm-10">{{ sale.status ? sale.status.value : '-' }}</dd>

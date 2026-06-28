@@ -1,66 +1,32 @@
 doctrine:
     dbal:
-        default_connection: default
-        connections:
-            default:
-                url: '%env(resolve:DATABASE_URL)%'
-                profiling_collect_backtrace: '%kernel.debug%'
-            global:
-                url: '%env(resolve:GLOBAL_DATABASE_URL)%'
-                profiling_collect_backtrace: '%kernel.debug%'
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
     orm:
-        default_entity_manager: default
-        entity_managers:
-            default:
-                connection: default
-                validate_xml_mapping: true
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                mappings:
-                    Crm:
-                        type: attribute
-                        is_bundle: false
-                        dir: '%kernel.project_dir%/src/Entity/Crm'
-                        prefix: 'App\Entity\Crm'
-                        alias: Crm
-            global:
-                connection: global
-                validate_xml_mapping: true
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                mappings:
-                    Global:
-                        type: attribute
-                        is_bundle: false
-                        dir: '%kernel.project_dir%/src/Entity/Global'
-                        prefix: 'App\Entity\Global'
-                        alias: Global
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        mappings:
+            Crm:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity/Crm'
+                prefix: 'App\Entity\Crm'
+                alias: Crm
 
 when@test:
     doctrine:
         dbal:
-            connections:
-                default:
-                    dbname_suffix: '_test%env(default::TEST_TOKEN)%'
-                global:
-                    dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 
 when@prod:
     doctrine:
         orm:
-            entity_managers:
-                default:
-                    query_cache_driver:
-                        type: pool
-                        pool: doctrine.system_cache_pool
-                    result_cache_driver:
-                        type: pool
-                        pool: doctrine.result_cache_pool
-                global:
-                    query_cache_driver:
-                        type: pool
-                        pool: doctrine.system_cache_pool
-                    result_cache_driver:
-                        type: pool
-                        pool: doctrine.result_cache_pool
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
 
     framework:
         cache:

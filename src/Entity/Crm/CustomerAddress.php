@@ -5,8 +5,8 @@ namespace App\Entity\Crm;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'owneraddress')]
-class OwnerAddress
+#[ORM\Table(name: 'customeraddress')]
+class CustomerAddress
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,9 +31,9 @@ class OwnerAddress
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $country = null;
 
-    #[ORM\ManyToOne(targetEntity: Owner::class, inversedBy: 'addresses')]
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'addresses')]
     #[ORM\JoinColumn(name: 'stateId', referencedColumnName: 'stateId', nullable: false, onDelete: 'CASCADE')]
-    private ?Owner $owner = null;
+    private ?Customer $customer = null;
 
     public function getAddressId(): ?int
     {
@@ -112,14 +112,14 @@ class OwnerAddress
         return $this;
     }
 
-    public function getOwner(): ?Owner
+    public function getCustomer(): ?Customer
     {
-        return $this->owner;
+        return $this->customer;
     }
 
-    public function setOwner(?Owner $owner): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->owner = $owner;
+        $this->customer = $customer;
 
         return $this;
     }

@@ -2,16 +2,16 @@
 
 namespace App\Entity\Crm;
 
-use App\Enum\OwnerType;
-use App\Repository\OwnerRepository;
+use App\Enum\CustomerType;
+use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OwnerRepository::class)]
-#[ORM\Table(name: 'owner')]
-class Owner
+#[ORM\Entity(repositoryClass: CustomerRepository::class)]
+#[ORM\Table(name: 'customer')]
+class Customer
 {
     #[ORM\Id]
     #[ORM\Column(name: 'stateId', length: 20)]
@@ -23,8 +23,8 @@ class Owner
     #[ORM\Column(name: 'lastName', length: 70, nullable: true)]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 50, nullable: true, enumType: OwnerType::class)]
-    private ?OwnerType $type = OwnerType::Account;
+    #[ORM\Column(length: 50, nullable: true, enumType: CustomerType::class)]
+    private ?CustomerType $type = CustomerType::Customer;
 
     #[ORM\Column(name: 'proposerType', length: 30, nullable: true)]
     private ?string $proposerType = null;
@@ -62,24 +62,24 @@ class Owner
     #[ORM\Column(name: 'reasonForUnwanted', length: 50, nullable: true)]
     private ?string $reasonForUnwanted = null;
 
-    /** @var Collection<int, OwnerAddress> */
-    #[ORM\OneToMany(targetEntity: OwnerAddress::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    /** @var Collection<int, CustomerAddress> */
+    #[ORM\OneToMany(targetEntity: CustomerAddress::class, mappedBy: 'customer', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $addresses;
 
     /** @var Collection<int, Sale> */
-    #[ORM\OneToMany(targetEntity: Sale::class, mappedBy: 'owner', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Sale::class, mappedBy: 'customer', cascade: ['persist'])]
     private Collection $sales;
 
     /** @var Collection<int, Claim> */
-    #[ORM\OneToMany(targetEntity: Claim::class, mappedBy: 'owner', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Claim::class, mappedBy: 'customer', cascade: ['persist'])]
     private Collection $claims;
 
     /** @var Collection<int, License> */
-    #[ORM\OneToMany(targetEntity: License::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: License::class, mappedBy: 'customer', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $licenses;
 
     /** @var Collection<int, DrivingExperience> */
-    #[ORM\OneToMany(targetEntity: DrivingExperience::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: DrivingExperience::class, mappedBy: 'customer', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $drivingExperiences;
 
     public function __construct()
@@ -132,12 +132,12 @@ class Owner
         return trim(($this->firstName ?? '') . ' ' . ($this->lastName ?? ''));
     }
 
-    public function getType(): ?OwnerType
+    public function getType(): ?CustomerType
     {
         return $this->type;
     }
 
-    public function setType(?OwnerType $type): static
+    public function setType(?CustomerType $type): static
     {
         $this->type = $type;
 
@@ -288,17 +288,17 @@ class Owner
         return $this;
     }
 
-    /** @return Collection<int, OwnerAddress> */
+    /** @return Collection<int, CustomerAddress> */
     public function getAddresses(): Collection
     {
         return $this->addresses;
     }
 
-    public function addAddress(OwnerAddress $address): static
+    public function addAddress(CustomerAddress $address): static
     {
         if (!$this->addresses->contains($address)) {
             $this->addresses->add($address);
-            $address->setOwner($this);
+            $address->setCustomer($this);
         }
 
         return $this;

@@ -1,3 +1,9 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+###< symfony/framework-bundle ###
+
 # Cache and logs (Symfony2)
 /app/cache/*
 /app/logs/*

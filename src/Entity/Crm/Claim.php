@@ -27,9 +27,9 @@ class Claim
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(targetEntity: Owner::class, inversedBy: 'claims')]
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'claims')]
     #[ORM\JoinColumn(name: 'stateId', referencedColumnName: 'stateId', nullable: true, onDelete: 'CASCADE')]
-    private ?Owner $owner = null;
+    private ?Customer $customer = null;
 
     public function getClaimId(): ?int
     {
@@ -84,14 +84,14 @@ class Claim
         return $this;
     }
 
-    public function getOwner(): ?Owner
+    public function getCustomer(): ?Customer
     {
-        return $this->owner;
+        return $this->customer;
     }
 
-    public function setOwner(?Owner $owner): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->owner = $owner;
+        $this->customer = $customer;
 
         return $this;
     }
