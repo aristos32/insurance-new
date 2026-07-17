@@ -1,0 +1,2 @@
+-- Database is created by MYSQL_DATABASE env var.
+-- Place any one-time bootstrap SQL here if needed.

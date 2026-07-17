@@ -1,105 +1,121 @@
-# Insurance CRM (Symfony)
+# Insurance CRM (Laravel)
 
-Modern Symfony 7.2 rewrite of the legacy PHP insurance CRM. Single-database design with unified auth and CRM data.
+Laravel rewrite of the legacy PHP insurance office CRM. Single MySQL database, legacy table/column names preserved for data migration. Multi-tenant `clients/` folder logic is omitted.
+
+## Stack
+
+- Laravel 13
+- MySQL 8.4
+- Blade + Bootstrap 5
+- Docker Compose (PHP Apache + MySQL)
 
 ## Features
 
-- **Customers & Leads** — CRUD on `customer` records
-- **Contracts (Sales)** — motor, medical, life, fire/property, employer liability
-- **Transactions** — ledger with running balance per contract
-- **Claims** — linked to customers
-- **Notes** — attached to customers or contracts
-- **History** — audit log
-- **Users** — unified `user` table (admin, employee, customer login accounts)
-- **Reports** — expiring contracts, outstanding balances
-- **Authentication** — bcrypt passwords via Symfony Security
-
-## Requirements
-
-- Docker & Docker Compose
-- Or: PHP 8.2+, Composer, MySQL 8.x, and PHP extensions: `dom`/`xml`, `mbstring`, `intl`, `zip`, `pdo_mysql` (Fedora: `sudo dnf install php-xml php-mbstring php-intl php-pecl-zip php-mysqlnd`)
+- Owners & leads (`owner`)
+- Contracts / policies (`sale`) with motor vehicles and type-specific tables
+- Transactions with running remainder
+- Claims, notes, audit history
+- Users (`systemuser`) with role levels 1–6
+- Reports: expiring contracts, outstanding balances, production
 
 ## Quick start (Docker)
 
 ```bash
-cd insurance-new
-cp .env.local.example .env.local   # optional local overrides (secrets, ports)
+cp .env.example .env
+# APP_KEY is generated below
+
 docker compose up -d --build
+docker compose exec app php artisan key:generate
+docker compose exec -u root app chown -R www-data:www-data storage bootstrap/cache
+docker compose exec app php artisan migrate --force
+docker compose exec app php artisan db:seed --force
 ```
 
-Wait for MySQL to become healthy, then run migrations and seed data:
+Open http://localhost:8081
 
-```bash
-docker compose exec app php bin/console doctrine:database:create --if-not-exists
-docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
-docker compose exec app php bin/console doctrine:fixtures:load --no-interaction
-```
-
-Open **http://localhost:8081** and sign in:
-
-| Username  | Password      | Role          |
-|-----------|---------------|---------------|
-| admin     | admin123      | Administrator |
-| employee  | employee123   | Employee      |
-| maria     | customer123   | Customer      |
-
-Customer accounts are linked to a customer record via `user.stateId` and can view their details at `/my`.
+| Username | Password     | Role          |
+|----------|--------------|---------------|
+| admin    | admin123     | Administrator |
+| employee | employee123  | Employee      |
 
 ## Local development (without Docker)
 
-1. Create a MySQL database: `insurance`
-2. Configure `.env.local`:
-
-```dotenv
-DATABASE_URL="mysql://user:pass@127.0.0.1:3306/insurance?serverVersion=8.0&charset=utf8mb4"
-APP_SECRET=your_secret_here
-```
-
-3. Install and bootstrap:
+Requirements: PHP 8.2+, Composer, MySQL 8.x, extensions `pdo_mysql`, `mbstring`, `intl`, `zip`.
 
 ```bash
+cp .env.example .env
 composer install
-php bin/console doctrine:database:create --if-not-exists
-php bin/console doctrine:migrations:migrate --no-interaction
-php bin/console doctrine:fixtures:load --no-interaction
-symfony server:start
+php artisan key:generate
+# set DB_* in .env to your MySQL instance
+php artisan migrate
+php artisan db:seed
+php artisan serve
 ```
+
+## Schema conventions
+
+Table and column names match the legacy CRM (`owner`, `sale`, `systemuser`, camelCase columns, natural keys `stateId` / `saleId` / `username`).
+
+Auth + profile `systemuser` rows from the old dual-database layout are merged into one `systemuser` table.
+
+Quotation-related tables exist for migration parity; the old online quotation engine / `clients/` sites are not ported.
+
+Reference legacy DDL is kept under `database/legacy/`.
 
 ## Legacy data migration
 
-Reference SQL for the old two-database layout is kept in `migrations/legacy_crm_schema.sql` and `migrations/legacy_global_schema.sql`. For a fresh install, use the Doctrine migration in `migrations/Version20260627101206.php` instead.
+1. Dump the old databases (see `../insurance/Readme.md`):
 
-When importing legacy dumps, merge `systemuser` rows into the single `user` table and rename `owner` → `customer` as needed.
+```bash
+mysqldump --routines --databases onlinfi7_globalonlineinsa onlinfi7_officekaterina > dbdump.sql
+```
 
-## Project structure
+2. Import those databases into MySQL (keep original names or update `.env`).
+
+3. Set legacy connection settings in `.env`:
+
+```dotenv
+LEGACY_GLOBAL_DB_HOST=127.0.0.1
+LEGACY_GLOBAL_DB_DATABASE=onlinfi7_globalonlineinsa
+LEGACY_GLOBAL_DB_USERNAME=root
+LEGACY_GLOBAL_DB_PASSWORD=secret
+
+LEGACY_CLIENT_DB_HOST=127.0.0.1
+LEGACY_CLIENT_DB_DATABASE=onlinfi7_officekaterina
+LEGACY_CLIENT_DB_USERNAME=root
+LEGACY_CLIENT_DB_PASSWORD=secret
+```
+
+4. Run:
+
+```bash
+php artisan migrate --force
+php artisan crm:migrate-legacy --dry-run
+php artisan crm:migrate-legacy --rehash-md5
+# or: ./scripts/migrate_legacy.sh
+```
+
+`--rehash-md5` replaces irreversible MD5 hashes with random bcrypt passwords. Reset passwords after import.
+
+## Project layout
 
 ```
-src/
-  Controller/     # CRM HTTP endpoints
-  Entity/Crm/     # Database entities
-  Enum/           # Domain constants
-  Form/           # Symfony forms
-  Repository/     # Query logic
-  Security/       # Login redirect handler
-  Service/        # Business logic (transactions, audit)
-  DataFixtures/   # Test seeders
-templates/        # Twig views (Bootstrap 5)
-migrations/       # Legacy SQL reference + Doctrine migrations
-docker/           # MySQL init scripts
+app/Models/              # Eloquent models (legacy table names)
+app/Http/Controllers/    # CRM controllers
+app/Services/            # Transaction remainder + history audit
+app/Console/Commands/    # crm:migrate-legacy
+database/migrations/     # Schema matching legacy CRM
+database/seeders/        # Test fixtures
+resources/views/         # Blade UI
+docker/                  # Apache + MySQL init
+scripts/migrate_legacy.sh
 ```
 
 ## Useful commands
 
 ```bash
-php bin/console cache:clear
-php bin/phpunit
-php bin/console doctrine:schema:validate
+php artisan migrate:fresh --seed
+php artisan crm:migrate-legacy --dry-run
+php artisan route:list
+docker compose logs -f app
 ```
-
-## Tech stack
-
-- Symfony 7.2
-- Doctrine ORM 3
-- MySQL 8.4
-- Twig + Bootstrap 5 (CDN)
-- Docker (PHP 8.3 Apache + MySQL)
