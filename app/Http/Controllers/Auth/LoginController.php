@@ -43,6 +43,7 @@ class LoginController extends Controller
             return back()->withErrors(['username' => 'Invalid credentials.'])->onlyInput('username');
         }
 
+        // Upgrade MD5 hashes to bcrypt on the next successful login
         if (Hash::needsRehash((string) $user->getAuthPassword())) {
             $user->password = Hash::make($credentials['password']);
         }
