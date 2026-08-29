@@ -9,12 +9,6 @@ class Owner extends Model
 {
     protected $table = 'owner';
 
-    protected $primaryKey = 'stateId';
-
-    public $incrementing = false;
-
-    protected $keyType = 'string';
-
     public $timestamps = false;
 
     protected $fillable = [

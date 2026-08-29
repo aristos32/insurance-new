@@ -38,6 +38,7 @@ MySQL 8.4 only runs files in `docker-entrypoint-initdb.d` when the data volume i
    - Copies `cyprus-insurances` users from the global table into that office table (updates `kat` / `aristos33`, inserts users that existed only in global).
    - Drops `onlinfi7_globalonlineinsa`.
    - Grants the `insurance` app user on `onlinfi7_officekaterina`.
+3. `docker/mysql/02-add-owner-id.sql` — adds `id` (`INT AUTO_INCREMENT` primary key) on `owner`. `stateId` stays unique so child-table foreign keys are unchanged. Owner show/edit URLs use `id` because many production `stateId` values contain a slash (e.g. `5/28288`).
 
 After that, the container has one database. The Laravel app always connects to it (`DB_DATABASE=onlinfi7_officekaterina`). Sessions, cache, and the queue use files / sync, so Laravel does not need `sessions` / `cache` / `jobs` tables.
 
@@ -76,7 +77,7 @@ Open http://localhost:8081 and sign in with an existing office account (`kat`, `
 
 Requirements: PHP 8.2+, Composer, MySQL 8.x, extensions `pdo_mysql`, `mbstring`, `intl`, `zip`.
 
-Import the dump into MySQL yourself, run the unify SQL in `docker/mysql/01-unify-systemuser.sql`, then:
+Import the dump into MySQL yourself, then run `docker/mysql/01-unify-systemuser.sql` and `docker/mysql/02-add-owner-id.sql`, then:
 
 ```bash
 cp .env.example .env
@@ -103,4 +104,4 @@ MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=true
 
 ## Schema
 
-Table and column names match production (`owner`, `sale`, `systemuser`, camelCase columns, natural keys `stateId` / `saleId` / `username`). Reference DDL from the old project is under `database/legacy/`.
+Table and column names match production (`owner`, `sale`, `systemuser`, camelCase columns, natural keys `stateId` / `saleId` / `username`). `owner` also has a post-dump `id` auto-increment primary key for routing. Reference DDL from the old project is under `database/legacy/`.

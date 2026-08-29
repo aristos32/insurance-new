@@ -39,6 +39,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/dbdump.db:/docker-entrypoint-initdb.d/00-dbdump.sql:ro
       - ./docker/mysql/01-unify-systemuser.sql:/docker-entrypoint-initdb.d/01-unify-systemuser.sql:ro
+      - ./docker/mysql/02-add-owner-id.sql:/docker-entrypoint-initdb.d/02-add-owner-id.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
       interval: 5s
