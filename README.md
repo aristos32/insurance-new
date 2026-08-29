@@ -1,121 +1,106 @@
 # Insurance CRM (Laravel)
 
-Laravel rewrite of the legacy PHP insurance office CRM. Single MySQL database, legacy table/column names preserved for data migration. Multi-tenant `clients/` folder logic is omitted.
+Laravel rewrite of the legacy PHP insurance office CRM. Development uses an exact replica of the production MySQL schema in a single database: `onlinfi7_officekaterina`.
 
 ## Stack
 
 - Laravel 13
-- MySQL 8.4
+- MySQL 8.4 (compatible with RDS MySQL 8.0 / 8.4)
 - Blade + Bootstrap 5
 - Docker Compose (PHP Apache + MySQL)
 
-## Features
+## How the database is set up
 
-- Owners & leads (`owner`)
-- Contracts / policies (`sale`) with motor vehicles and type-specific tables
-- Transactions with running remainder
-- Claims, notes, audit history
-- Users (`systemuser`) with role levels 1–6
-- Reports: expiring contracts, outstanding balances, production
+Production originally used **two** MySQL 5.5 databases:
+
+| Database | Role |
+|---|---|
+| `onlinfi7_globalonlineinsa` | Login: `systemuser` with `password`, `role`, `status`, `clientName`, `productType` |
+| `onlinfi7_officekaterina` | CRM data (`owner`, `sale`, `transaction`, …) plus a profile-only `systemuser` (name, email, `stateId`) |
+
+This project keeps **only** `onlinfi7_officekaterina`. There are **no Laravel schema migrations**. The dump is the schema; you can change it later when you are ready.
+
+### Dump file
+
+Place a production dump at `docker/mysql/dbdump.db` (gitignored). Create it the same way as in the old project:
+
+```bash
+mysqldump --routines -u root -p --databases onlinfi7_globalonlineinsa onlinfi7_officekaterina > dbdump.db
+```
+
+### What Docker does on first start
+
+MySQL 8.4 only runs files in `docker-entrypoint-initdb.d` when the data volume is **empty**. `compose.yaml` mounts:
+
+1. `docker/mysql/dbdump.db` → `00-dbdump.sql` — imports both production databases as they were dumped.
+2. `docker/mysql/01-unify-systemuser.sql` — then:
+   - Adds auth columns onto `onlinfi7_officekaterina.systemuser` (`password`, `role`, `status`, `clientName`, `productType`, `consecutiveFailLoginAttempts`).
+   - Copies `cyprus-insurances` users from the global table into that office table (updates `kat` / `aristos33`, inserts users that existed only in global).
+   - Drops `onlinfi7_globalonlineinsa`.
+   - Grants the `insurance` app user on `onlinfi7_officekaterina`.
+
+After that, the container has one database. The Laravel app always connects to it (`DB_DATABASE=onlinfi7_officekaterina`). Sessions, cache, and the queue use files / sync, so Laravel does not need `sessions` / `cache` / `jobs` tables.
+
+Changing the dump does nothing until you wipe the volume:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+### Passwords
+
+Existing users still have production **MD5** hashes. Login accepts MD5 and bcrypt; new/updated passwords are stored as bcrypt (`varchar(60)`). Office access requires role ≥ employee and `productType` `OFFICE` or `ALL` (same rule as the old office login).
+
+### App connection
+
+Local Docker: host `database` inside Compose, `127.0.0.1:3306` from the host. SQL mode is relaxed (`NO_ENGINE_SUBSTITUTION,NO_AUTO_VALUE_ON_ZERO`, Laravel `DB_STRICT=false`) so the MySQL 5.5 dump loads on 8.4.
+
+RDS later uses the same `mysql` connection. Set `MYSQL_ATTR_SSL_CA` to the AWS `global-bundle.pem`; SSL options are applied only when a CA is set (PHP 8.4 `Pdo\Mysql`).
 
 ## Quick start (Docker)
 
 ```bash
 cp .env.example .env
-# APP_KEY is generated below
+# put docker/mysql/dbdump.db in place if it is not already there
 
+docker compose down -v
 docker compose up -d --build
 docker compose exec app php artisan key:generate
 docker compose exec -u root app chown -R www-data:www-data storage bootstrap/cache
-docker compose exec app php artisan migrate --force
-docker compose exec app php artisan db:seed --force
 ```
 
-Open http://localhost:8081
-
-| Username | Password     | Role          |
-|----------|--------------|---------------|
-| admin    | admin123     | Administrator |
-| employee | employee123  | Employee      |
+Open http://localhost:8081 and sign in with an existing office account (`kat`, `aristos33`, …) and the production password.
 
 ## Local development (without Docker)
 
 Requirements: PHP 8.2+, Composer, MySQL 8.x, extensions `pdo_mysql`, `mbstring`, `intl`, `zip`.
 
+Import the dump into MySQL yourself, run the unify SQL in `docker/mysql/01-unify-systemuser.sql`, then:
+
 ```bash
 cp .env.example .env
 composer install
 php artisan key:generate
-# set DB_* in .env to your MySQL instance
-php artisan migrate
-php artisan db:seed
+# DB_HOST / DB_DATABASE=onlinfi7_officekaterina / DB_USERNAME / DB_PASSWORD
 php artisan serve
 ```
 
-## Schema conventions
+## RDS MySQL 8
 
-Table and column names match the legacy CRM (`owner`, `sale`, `systemuser`, camelCase columns, natural keys `stateId` / `saleId` / `username`).
-
-Auth + profile `systemuser` rows from the old dual-database layout are merged into one `systemuser` table.
-
-Quotation-related tables exist for migration parity; the old online quotation engine / `clients/` sites are not ported.
-
-Reference legacy DDL is kept under `database/legacy/`.
-
-## Legacy data migration
-
-1. Dump the old databases (see `../insurance/Readme.md`):
-
-```bash
-mysqldump --routines --databases onlinfi7_globalonlineinsa onlinfi7_officekaterina > dbdump.sql
-```
-
-2. Import those databases into MySQL (keep original names or update `.env`).
-
-3. Set legacy connection settings in `.env`:
+Same connection name (`mysql`), with SSL:
 
 ```dotenv
-LEGACY_GLOBAL_DB_HOST=127.0.0.1
-LEGACY_GLOBAL_DB_DATABASE=onlinfi7_globalonlineinsa
-LEGACY_GLOBAL_DB_USERNAME=root
-LEGACY_GLOBAL_DB_PASSWORD=secret
-
-LEGACY_CLIENT_DB_HOST=127.0.0.1
-LEGACY_CLIENT_DB_DATABASE=onlinfi7_officekaterina
-LEGACY_CLIENT_DB_USERNAME=root
-LEGACY_CLIENT_DB_PASSWORD=secret
+DB_CONNECTION=mysql
+DB_HOST=insurance.xxxx.us-west-2.rds.amazonaws.com
+DB_PORT=3306
+DB_DATABASE=onlinfi7_officekaterina
+DB_USERNAME=...
+DB_PASSWORD=...
+MYSQL_ATTR_SSL_CA=/path/to/global-bundle.pem
+MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=true
 ```
 
-4. Run:
+## Schema
 
-```bash
-php artisan migrate --force
-php artisan crm:migrate-legacy --dry-run
-php artisan crm:migrate-legacy --rehash-md5
-# or: ./scripts/migrate_legacy.sh
-```
-
-`--rehash-md5` replaces irreversible MD5 hashes with random bcrypt passwords. Reset passwords after import.
-
-## Project layout
-
-```
-app/Models/              # Eloquent models (legacy table names)
-app/Http/Controllers/    # CRM controllers
-app/Services/            # Transaction remainder + history audit
-app/Console/Commands/    # crm:migrate-legacy
-database/migrations/     # Schema matching legacy CRM
-database/seeders/        # Test fixtures
-resources/views/         # Blade UI
-docker/                  # Apache + MySQL init
-scripts/migrate_legacy.sh
-```
-
-## Useful commands
-
-```bash
-php artisan migrate:fresh --seed
-php artisan crm:migrate-legacy --dry-run
-php artisan route:list
-docker compose logs -f app
-```
+Table and column names match production (`owner`, `sale`, `systemuser`, camelCase columns, natural keys `stateId` / `saleId` / `username`). Reference DDL from the old project is under `database/legacy/`.

@@ -7,6 +7,7 @@ use App\Models\SystemUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -30,7 +31,7 @@ class LoginController extends Controller
             return back()->withErrors(['username' => 'This account is suspended.'])->onlyInput('username');
         }
 
-        if (! Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $request->boolean('remember'))) {
+        if (! $user || ! Hash::check($credentials['password'], (string) $user->getAuthPassword())) {
             if ($user) {
                 $user->consecutiveFailLoginAttempts = (int) $user->consecutiveFailLoginAttempts + 1;
                 if ($user->consecutiveFailLoginAttempts >= 3) {
@@ -42,18 +43,15 @@ class LoginController extends Controller
             return back()->withErrors(['username' => 'Invalid credentials.'])->onlyInput('username');
         }
 
-        $request->session()->regenerate();
-
-        /** @var SystemUser $authUser */
-        $authUser = Auth::user();
-        $authUser->consecutiveFailLoginAttempts = 0;
-        $authUser->save();
-
-        if (! $authUser->isOfficeUser()) {
-            Auth::logout();
-
+        if (! $user->isOfficeUser()) {
             return back()->withErrors(['username' => 'Office access requires an employee role or higher.']);
         }
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        $user->consecutiveFailLoginAttempts = 0;
+        $user->save();
 
         return redirect()->intended(route('dashboard'));
     }

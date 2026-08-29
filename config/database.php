@@ -3,6 +3,37 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+if (! function_exists('mysql_pdo_options')) {
+    /**
+     * PDO options for MySQL 8 / RDS (SSL is applied only when a CA is configured).
+     *
+     * @return array<int, mixed>
+     */
+    function mysql_pdo_options(): array
+    {
+        if (! extension_loaded('pdo_mysql')) {
+            return [];
+        }
+
+        $options = [
+            Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA') ?: null,
+            Mysql::ATTR_SSL_CAPATH => env('MYSQL_ATTR_SSL_CAPATH') ?: null,
+            Mysql::ATTR_SSL_CERT => env('MYSQL_ATTR_SSL_CERT') ?: null,
+            Mysql::ATTR_SSL_KEY => env('MYSQL_ATTR_SSL_KEY') ?: null,
+            Mysql::ATTR_SSL_CIPHER => env('MYSQL_ATTR_SSL_CIPHER') ?: null,
+        ];
+
+        if (! empty(env('MYSQL_ATTR_SSL_CA')) || ! empty(env('MYSQL_ATTR_SSL_CAPATH'))) {
+            $options[Mysql::ATTR_SSL_VERIFY_SERVER_CERT] = filter_var(
+                env('MYSQL_ATTR_SSL_VERIFY_SERVER_CERT', true),
+                FILTER_VALIDATE_BOOLEAN
+            );
+        }
+
+        return array_filter($options, static fn ($value) => $value !== null && $value !== '');
+    }
+}
+
 return [
 
     /*
@@ -17,7 +48,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -49,7 +80,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
+            'database' => env('DB_DATABASE', 'onlinfi7_officekaterina'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
@@ -57,37 +88,9 @@ return [
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+            'strict' => filter_var(env('DB_STRICT', false), FILTER_VALIDATE_BOOLEAN),
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
-
-        'legacy_global' => [
-            'driver' => 'mysql',
-            'host' => env('LEGACY_GLOBAL_DB_HOST', '127.0.0.1'),
-            'port' => env('LEGACY_GLOBAL_DB_PORT', '3306'),
-            'database' => env('LEGACY_GLOBAL_DB_DATABASE', 'onlinfi7_globalonlineinsa'),
-            'username' => env('LEGACY_GLOBAL_DB_USERNAME', 'root'),
-            'password' => env('LEGACY_GLOBAL_DB_PASSWORD', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
-
-        'legacy_client' => [
-            'driver' => 'mysql',
-            'host' => env('LEGACY_CLIENT_DB_HOST', '127.0.0.1'),
-            'port' => env('LEGACY_CLIENT_DB_PORT', '3306'),
-            'database' => env('LEGACY_CLIENT_DB_DATABASE', 'onlinfi7_officekaterina'),
-            'username' => env('LEGACY_CLIENT_DB_USERNAME', 'root'),
-            'password' => env('LEGACY_CLIENT_DB_PASSWORD', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
+            'options' => mysql_pdo_options(),
         ],
 
         'mariadb' => [
@@ -105,9 +108,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => mysql_pdo_options(),
         ],
 
         'pgsql' => [

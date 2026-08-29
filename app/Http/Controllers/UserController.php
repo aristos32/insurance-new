@@ -7,6 +7,7 @@ use App\Models\SystemUser;
 use App\Services\HistoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -44,6 +45,8 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        $data['password'] = Hash::make($data['password']);
+        $data['clientName'] = filled($data['clientName'] ?? null) ? $data['clientName'] : 'cyprus-insurances';
         SystemUser::create($data);
         $this->history->log('USER', 'CREATE', 'username', $data['username'], 'Created user');
 
@@ -63,6 +66,8 @@ class UserController extends Controller
         $data = $this->validated($request, $user);
         if (empty($data['password'])) {
             unset($data['password']);
+        } else {
+            $data['password'] = Hash::make($data['password']);
         }
         $user->update($data);
         $this->history->log('USER', 'UPDATE', 'username', $user->username, 'Updated user');
@@ -96,7 +101,6 @@ class UserController extends Controller
             'role' => ['required', Rule::enum(UserRole::class)],
             'status' => ['required', Rule::in(['ACTIVE', 'SUSPENDED'])],
             'productType' => ['nullable', 'string', 'max:20'],
-            'subProductType' => ['nullable', 'string', 'max:20'],
             'clientName' => ['nullable', 'string', 'max:40'],
             'stateId' => ['nullable', 'string', 'max:20'],
             'title' => ['nullable', 'string', 'max:10'],
@@ -107,7 +111,7 @@ class UserController extends Controller
             'telephone' => ['nullable', 'string', 'max:20'],
             'cellphone' => ['nullable', 'string', 'max:20'],
             'profession' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:50'],
+            'email' => ['required', 'email', 'max:50'],
         ]);
     }
 }

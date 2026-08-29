@@ -27,7 +27,6 @@ class SystemUser extends Authenticatable
         'role',
         'status',
         'productType',
-        'subProductType',
         'clientName',
         'consecutiveFailLoginAttempts',
         'stateId',
@@ -46,13 +45,11 @@ class SystemUser extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
             'birthDate' => 'datetime',
             'licenseIssueDate' => 'datetime',
             'consecutiveFailLoginAttempts' => 'integer',
@@ -64,6 +61,11 @@ class SystemUser extends Authenticatable
         return 'username';
     }
 
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Owner::class, 'stateId', 'stateId');
@@ -71,7 +73,7 @@ class SystemUser extends Authenticatable
 
     public function roleEnum(): UserRole
     {
-        return UserRole::from((string) $this->role);
+        return UserRole::tryFrom((string) $this->role) ?? UserRole::Anonymous;
     }
 
     public function isActive(): bool
@@ -81,7 +83,10 @@ class SystemUser extends Authenticatable
 
     public function isOfficeUser(): bool
     {
-        return $this->roleEnum()->atLeast(UserRole::Employee);
+        $productType = $this->productType;
+
+        return $this->roleEnum()->atLeast(UserRole::Employee)
+            && ($productType === null || in_array($productType, ['OFFICE', 'ALL'], true));
     }
 
     public function fullName(): string

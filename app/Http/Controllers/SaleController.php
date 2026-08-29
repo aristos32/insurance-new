@@ -156,7 +156,7 @@ class SaleController extends Controller
             'startDate' => ['nullable', 'date'],
             'endDate' => ['nullable', 'date', 'after_or_equal:startDate'],
             'associate' => ['nullable', 'string', 'max:50'],
-            'producer' => ['nullable', 'string', 'max:70'],
+            'producer' => ['nullable', 'string', 'max:20'],
             'status' => ['required', Rule::enum(SaleStatus::class)],
         ]);
     }

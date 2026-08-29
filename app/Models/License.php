@@ -11,6 +11,10 @@ class License extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
+    protected $primaryKey = null;
+
     protected $fillable = [
         'stateId',
         'licenseType',

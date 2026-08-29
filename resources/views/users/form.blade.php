@@ -36,7 +36,7 @@
         <div class="col-md-4"><label class="form-label">Client name</label><input name="clientName" class="form-control" value="{{ old('clientName', $user->clientName) }}"></div>
         <div class="col-md-4"><label class="form-label">First name</label><input name="firstName" class="form-control" value="{{ old('firstName', $user->firstName) }}"></div>
         <div class="col-md-4"><label class="form-label">Last name</label><input name="lastName" class="form-control" value="{{ old('lastName', $user->lastName) }}"></div>
-        <div class="col-md-4"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}"></div>
+        <div class="col-md-4"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required></div>
         <div class="col-md-4"><label class="form-label">Linked stateId</label><input name="stateId" class="form-control" value="{{ old('stateId', $user->stateId) }}"></div>
         <div class="col-md-4"><label class="form-label">Telephone</label><input name="telephone" class="form-control" value="{{ old('telephone', $user->telephone) }}"></div>
         <div class="col-md-4"><label class="form-label">Producer</label><input name="producer" class="form-control" value="{{ old('producer', $user->producer) }}"></div>
