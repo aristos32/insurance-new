@@ -43,7 +43,13 @@ class LoginController extends Controller
             return back()->withErrors(['username' => 'Invalid credentials.'])->onlyInput('username');
         }
 
+        if (Hash::needsRehash((string) $user->getAuthPassword())) {
+            $user->password = Hash::make($credentials['password']);
+        }
+
         if (! $user->isOfficeUser()) {
+            $user->save();
+
             return back()->withErrors(['username' => 'Office access requires an employee role or higher.']);
         }
 

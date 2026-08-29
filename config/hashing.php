@@ -17,6 +17,6 @@ return [
         'verify' => env('HASH_VERIFY', true),
     ],
 
-    'rehash_on_login' => false,
+    'rehash_on_login' => true,
 
 ];

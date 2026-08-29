@@ -50,7 +50,7 @@ docker compose up -d
 
 ### Passwords
 
-Existing users still have production **MD5** hashes. Login accepts MD5 and bcrypt; new/updated passwords are stored as bcrypt (`varchar(60)`). Office access requires role ≥ employee and `productType` `OFFICE` or `ALL` (same rule as the old office login).
+Existing users still have production **MD5** hashes. Login accepts MD5 or bcrypt. MD5 cannot be reversed, so hashes are upgraded to bcrypt on the next successful login (plaintext is available only at that moment). New or edited passwords are stored as bcrypt (`varchar(60)`). Office access requires role ≥ employee and `productType` `OFFICE` or `ALL` (same rule as the old office login).
 
 ### App connection
 

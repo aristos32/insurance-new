@@ -6,7 +6,7 @@ use Illuminate\Contracts\Hashing\Hasher;
 
 /**
  * Verifies production MD5 hashes and Laravel bcrypt hashes.
- * New passwords are stored with bcrypt (fits systemuser.password varchar(60)).
+ * MD5 hashes are reported as needing a rehash so login can upgrade them to bcrypt.
  */
 class LegacyCompatibleHasher implements Hasher
 {
@@ -46,7 +46,7 @@ class LegacyCompatibleHasher implements Hasher
         $hash = (string) $hashedValue;
 
         if ($this->isMd5($hash)) {
-            return false;
+            return true;
         }
 
         $cost = (int) ($options['rounds'] ?? env('BCRYPT_ROUNDS', 12));
