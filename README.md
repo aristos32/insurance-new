@@ -2,6 +2,37 @@
 
 Laravel rewrite of the legacy PHP insurance office CRM. Development uses an exact replica of the production MySQL schema in a single database: `onlinfi7_officekaterina`.
 
+## Quick start (Docker)
+
+```bash
+cp .env.example .env
+# put docker/mysql/dbdump.db in place if it is not already there
+
+docker compose down -v
+docker compose up -d --build
+docker compose exec app php artisan key:generate
+docker compose exec -u root app chown -R www-data:www-data storage bootstrap/cache
+```
+
+Open http://localhost:8081 and sign in with an existing office account (`kat`, `aristos33`, …) and the production password.
+
+Local Database(dbeaver):# DB_HOST=localhost / DB_DATABASE=onlinfi7_officekaterina / DB_USERNAME / DB_PASSWORD
+
+## Local development (without Docker)
+
+Requirements: PHP 8.2+, Composer, MySQL 8.x, extensions `pdo_mysql`, `mbstring`, `intl`, `zip`.
+
+Import the dump into MySQL yourself, then run `docker/mysql/01-unify-systemuser.sql` and `docker/mysql/02-add-owner-id.sql`, then:
+
+```bash
+cp .env.example .env
+composer install
+php artisan key:generate
+# DB_HOST / DB_DATABASE=onlinfi7_officekaterina / DB_USERNAME / DB_PASSWORD
+php artisan serve
+```
+
+
 ## Stack
 
 - Laravel 13
@@ -59,33 +90,6 @@ Local Docker: host `database` inside Compose, `127.0.0.1:3306` from the host. SQ
 
 RDS later uses the same `mysql` connection. Set `MYSQL_ATTR_SSL_CA` to the AWS `global-bundle.pem`; SSL options are applied only when a CA is set (PHP 8.4 `Pdo\Mysql`).
 
-## Quick start (Docker)
-
-```bash
-cp .env.example .env
-# put docker/mysql/dbdump.db in place if it is not already there
-
-docker compose down -v
-docker compose up -d --build
-docker compose exec app php artisan key:generate
-docker compose exec -u root app chown -R www-data:www-data storage bootstrap/cache
-```
-
-Open http://localhost:8081 and sign in with an existing office account (`kat`, `aristos33`, …) and the production password.
-
-## Local development (without Docker)
-
-Requirements: PHP 8.2+, Composer, MySQL 8.x, extensions `pdo_mysql`, `mbstring`, `intl`, `zip`.
-
-Import the dump into MySQL yourself, then run `docker/mysql/01-unify-systemuser.sql` and `docker/mysql/02-add-owner-id.sql`, then:
-
-```bash
-cp .env.example .env
-composer install
-php artisan key:generate
-# DB_HOST / DB_DATABASE=onlinfi7_officekaterina / DB_USERNAME / DB_PASSWORD
-php artisan serve
-```
 
 ## RDS MySQL 8
 
