@@ -61,7 +61,7 @@ class OwnerController extends Controller
 
         $this->history->log('CLIENT', 'CREATE', 'stateId', $owner->stateId, 'Created owner');
 
-        return redirect()->route('owners.show', $owner)->with('success', 'Owner created.');
+        return redirect()->route('owners.show', $owner)->with('success', __('flash.owner_created'));
     }
 
     public function show(Owner $owner): View
@@ -83,7 +83,7 @@ class OwnerController extends Controller
         $owner->update($this->validated($request, $owner));
         $this->history->log('CLIENT', 'UPDATE', 'stateId', $owner->stateId, 'Updated owner');
 
-        return redirect()->route('owners.show', $owner)->with('success', 'Owner updated.');
+        return redirect()->route('owners.show', $owner)->with('success', __('flash.owner_updated'));
     }
 
     public function destroy(Owner $owner): RedirectResponse
@@ -92,7 +92,7 @@ class OwnerController extends Controller
         $owner->delete();
         $this->history->log('CLIENT', 'DELETE', 'stateId', $stateId, 'Deleted owner');
 
-        return redirect()->route('owners.index')->with('success', 'Owner deleted.');
+        return redirect()->route('owners.index')->with('success', __('flash.owner_deleted'));
     }
 
     private function validated(Request $request, ?Owner $owner = null): array

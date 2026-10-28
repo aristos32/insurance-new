@@ -51,6 +51,6 @@ class TransactionController extends Controller
 
         $this->history->log('CONTRACT', 'TRANSACTION', 'saleId', $sale->saleId, $data['details']);
 
-        return redirect()->route('transactions.index', $sale)->with('success', 'Transaction recorded.');
+        return redirect()->route('transactions.index', $sale)->with('success', __('flash.transaction_recorded'));
     }
 }

@@ -52,7 +52,7 @@ class ClaimController extends Controller
         $claim = Claim::create($data);
         $this->history->log('CLIENT', 'CLAIM', 'stateId', $claim->stateId, 'Claim '.$claim->claimId);
 
-        return redirect()->route('claims.index')->with('success', 'Claim created.');
+        return redirect()->route('claims.index')->with('success', __('flash.claim_created'));
     }
 
     public function destroy(Claim $claim): RedirectResponse
@@ -61,6 +61,6 @@ class ClaimController extends Controller
         $claim->delete();
         $this->history->log('CLIENT', 'CLAIM_DELETE', 'stateId', $stateId, 'Deleted claim');
 
-        return redirect()->route('claims.index')->with('success', 'Claim deleted.');
+        return redirect()->route('claims.index')->with('success', __('flash.claim_deleted'));
     }
 }

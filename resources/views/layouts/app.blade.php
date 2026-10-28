@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Insurance CRM')</title>
+    <title>@yield('title', __('nav.brand'))</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -26,30 +26,35 @@
 @auth
 <nav class="navbar navbar-expand-lg mb-4">
     <div class="container">
-        <a class="navbar-brand fw-semibold" href="{{ route('dashboard') }}">Insurance CRM</a>
+        <a class="navbar-brand fw-semibold" href="{{ route('dashboard') }}">{{ __('nav.brand') }}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ route('owners.index') }}">Owners</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('sales.index') }}">Contracts</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('claims.index') }}">Claims</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('notes.index') }}">Notes</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('history.index') }}">History</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('reports.index') }}">Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('owners.index') }}">{{ __('nav.owners') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('sales.index') }}">{{ __('nav.contracts') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('claims.index') }}">{{ __('nav.claims') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('notes.index') }}">{{ __('nav.notes') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('history.index') }}">{{ __('nav.history') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('reports.index') }}">{{ __('nav.reports') }}</a></li>
                 @if(auth()->user()->roleEnum()->atLeast(\App\Enums\UserRole::Administrator))
-                    <li class="nav-item"><a class="nav-link" href="{{ route('users.index') }}">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('users.index') }}">{{ __('nav.users') }}</a></li>
                 @endif
             </ul>
             <span class="navbar-text me-3">{{ auth()->user()->fullName() }}</span>
-            <form method="POST" action="{{ route('logout') }}">
+            @include('partials.locale-switcher', ['tone' => 'light'])
+            <form method="POST" action="{{ route('logout') }}" class="ms-3">
                 @csrf
-                <button class="btn btn-sm btn-outline-light">Logout</button>
+                <button class="btn btn-sm btn-outline-light">{{ __('nav.logout') }}</button>
             </form>
         </div>
     </div>
 </nav>
+@else
+<div class="container pt-3 d-flex justify-content-end">
+    @include('partials.locale-switcher', ['tone' => 'secondary'])
+</div>
 @endauth
 
 <main class="container pb-5">
