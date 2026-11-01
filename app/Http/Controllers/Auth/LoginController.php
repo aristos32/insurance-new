@@ -28,7 +28,7 @@ class LoginController extends Controller
         $user = SystemUser::query()->where('username', $credentials['username'])->first();
 
         if ($user && ! $user->isActive()) {
-            return back()->withErrors(['username' => 'This account is suspended.'])->onlyInput('username');
+            return back()->withErrors(['username' => __('auth.suspended')])->onlyInput('username');
         }
 
         if (! $user || ! Hash::check($credentials['password'], (string) $user->getAuthPassword())) {
@@ -40,7 +40,7 @@ class LoginController extends Controller
                 $user->save();
             }
 
-            return back()->withErrors(['username' => 'Invalid credentials.'])->onlyInput('username');
+            return back()->withErrors(['username' => __('auth.invalid_credentials')])->onlyInput('username');
         }
 
         // Upgrade MD5 hashes to bcrypt on the next successful login
@@ -51,7 +51,7 @@ class LoginController extends Controller
         if (! $user->isOfficeUser()) {
             $user->save();
 
-            return back()->withErrors(['username' => 'Office access requires an employee role or higher.']);
+            return back()->withErrors(['username' => __('auth.office_required')]);
         }
 
         Auth::login($user);

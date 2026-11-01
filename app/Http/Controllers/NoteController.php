@@ -56,13 +56,13 @@ class NoteController extends Controller
         Note::create($data);
         $this->history->log($data['type'], 'NOTE', $data['parameterName'] ?? null, $data['parameterValue'] ?? null, $data['description']);
 
-        return redirect()->route('notes.index')->with('success', 'Note created.');
+        return redirect()->route('notes.index')->with('success', __('flash.note_created'));
     }
 
     public function destroy(Note $note): RedirectResponse
     {
         $note->delete();
 
-        return redirect()->route('notes.index')->with('success', 'Note deleted.');
+        return redirect()->route('notes.index')->with('success', __('flash.note_deleted'));
     }
 }

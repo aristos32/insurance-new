@@ -91,7 +91,7 @@ class SaleController extends Controller
 
         $this->history->log('CONTRACT', 'CREATE', 'saleId', $sale->saleId, 'Created contract');
 
-        return redirect()->route('sales.show', $sale)->with('success', 'Contract created.');
+        return redirect()->route('sales.show', $sale)->with('success', __('flash.contract_created'));
     }
 
     public function show(Sale $sale): View
@@ -128,7 +128,7 @@ class SaleController extends Controller
         $sale->update($this->validated($request, $sale));
         $this->history->log('CONTRACT', 'UPDATE', 'saleId', $sale->saleId, 'Updated contract');
 
-        return redirect()->route('sales.show', $sale)->with('success', 'Contract updated.');
+        return redirect()->route('sales.show', $sale)->with('success', __('flash.contract_updated'));
     }
 
     public function destroy(Sale $sale): RedirectResponse
@@ -137,7 +137,7 @@ class SaleController extends Controller
         $sale->delete();
         $this->history->log('CONTRACT', 'DELETE', 'saleId', $saleId, 'Deleted contract');
 
-        return redirect()->route('sales.index')->with('success', 'Contract deleted.');
+        return redirect()->route('sales.index')->with('success', __('flash.contract_deleted'));
     }
 
     private function validated(Request $request, ?Sale $sale = null): array

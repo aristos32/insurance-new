@@ -50,7 +50,7 @@ class UserController extends Controller
         SystemUser::create($data);
         $this->history->log('USER', 'CREATE', 'username', $data['username'], 'Created user');
 
-        return redirect()->route('users.index')->with('success', 'User created.');
+        return redirect()->route('users.index')->with('success', __('flash.user_created'));
     }
 
     public function edit(SystemUser $user): View
@@ -72,20 +72,20 @@ class UserController extends Controller
         $user->update($data);
         $this->history->log('USER', 'UPDATE', 'username', $user->username, 'Updated user');
 
-        return redirect()->route('users.index')->with('success', 'User updated.');
+        return redirect()->route('users.index')->with('success', __('flash.user_updated'));
     }
 
     public function destroy(SystemUser $user): RedirectResponse
     {
         if ($user->username === auth()->user()->username) {
-            return back()->withErrors(['username' => 'You cannot delete your own account.']);
+            return back()->withErrors(['username' => __('users.cannot_delete_self')]);
         }
 
         $username = $user->username;
         $user->delete();
         $this->history->log('USER', 'DELETE', 'username', $username, 'Deleted user');
 
-        return redirect()->route('users.index')->with('success', 'User deleted.');
+        return redirect()->route('users.index')->with('success', __('flash.user_deleted'));
     }
 
     private function validated(Request $request, ?SystemUser $user = null): array

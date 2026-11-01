@@ -8,9 +8,10 @@ Laravel rewrite of the legacy PHP insurance office CRM. Development uses an exac
 cp .env.example .env
 # put docker/mysql/dbdump.db in place if it is not already there
 
-docker compose down -v
-docker compose up -d --build
-docker compose exec app php artisan key:generate
+docker compose down -v &&
+docker compose up -d --build &&
+docker compose exec app composer install &&
+docker compose exec app php artisan key:generate &&
 docker compose exec -u root app chown -R www-data:www-data storage bootstrap/cache
 ```
 

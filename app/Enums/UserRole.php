@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\TranslatesLabel;
+
 enum UserRole: string
 {
+    use TranslatesLabel;
     case Anonymous = '1';
     case Customer = '2';
     case Employee = '3';
@@ -14,12 +17,12 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Anonymous => 'Anonymous',
-            self::Customer => 'Customer',
-            self::Employee => 'Employee',
-            self::Agent => 'Agent',
-            self::Administrator => 'Administrator',
-            self::Super => 'Super',
+            self::Anonymous => __('enums.role.anonymous'),
+            self::Customer => __('enums.role.customer'),
+            self::Employee => __('enums.role.employee'),
+            self::Agent => __('enums.role.agent'),
+            self::Administrator => __('enums.role.administrator'),
+            self::Super => __('enums.role.super'),
         };
     }
 

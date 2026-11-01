@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Claims')
+@section('title', __('claims.title'))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Claims</h1>
-    <a href="{{ route('claims.create') }}" class="btn btn-primary">New claim</a>
+    <h1 class="h3 mb-0">{{ __('claims.title') }}</h1>
+    <a href="{{ route('claims.create') }}" class="btn btn-primary">{{ __('claims.new') }}</a>
 </div>
 <form class="row g-2 mb-3">
-    <div class="col-md-8"><input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Search owner or description"></div>
-    <div class="col-md-4"><button class="btn btn-outline-secondary w-100">Filter</button></div>
+    <div class="col-md-8"><input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="{{ __('claims.search') }}"></div>
+    <div class="col-md-4"><button class="btn btn-outline-secondary w-100">{{ __('common.filter') }}</button></div>
 </form>
 <div class="card">
     <div class="table-responsive">
         <table class="table mb-0">
-            <thead><tr><th>ID</th><th>Owner</th><th>Amount</th><th>Date</th><th>Description</th><th></th></tr></thead>
+            <thead><tr><th>{{ __('common.id') }}</th><th>{{ __('common.owner') }}</th><th>{{ __('common.amount') }}</th><th>{{ __('common.date') }}</th><th>{{ __('common.description') }}</th><th></th></tr></thead>
             <tbody>
             @foreach($claims as $claim)
                 <tr>
@@ -24,9 +24,9 @@
                     <td>{{ optional($claim->claimDate)->format('Y-m-d') }}</td>
                     <td>{{ $claim->description }}</td>
                     <td>
-                        <form method="POST" action="{{ route('claims.destroy', $claim) }}" onsubmit="return confirm('Delete claim?')">
+                        <form method="POST" action="{{ route('claims.destroy', $claim) }}" onsubmit="return confirm(@js(__('claims.confirm_delete')))">
                             @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            <button class="btn btn-sm btn-outline-danger">{{ __('common.delete') }}</button>
                         </form>
                     </td>
                 </tr>

@@ -14,13 +14,13 @@ class EnsureOfficeUser
         $user = $request->user();
 
         if (! $user || ! $user->isActive()) {
-            abort(403, 'Account is not active.');
+            abort(403, __('auth.inactive'));
         }
 
         $minimum = UserRole::from($minimumRole);
 
         if (! $user->roleEnum()->atLeast($minimum)) {
-            abort(403, 'Insufficient permissions.');
+            abort(403, __('auth.forbidden'));
         }
 
         return $next($request);
